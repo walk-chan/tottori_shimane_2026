@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星ノ導き・神話の旅 ｜ 出雲・鳥取 7日遊</title>
+  <link rel="apple-touch-icon" href="IMG_3761.png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Noto Sans TC, Noto Serif JP for elegant Shinto feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=300;400;500;700&family=Noto+Serif+JP:wght=400;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            serif: ['Noto Serif JP', 'Noto Sans TC', 'serif'],
+          },
+          colors: {
+            izumo: {
+              deep: '#040814',      // 更加深沉神秘的星夜藍
+              slate: '#0F1626',     // 暮色星雲藍
+              gold: '#E5A93B',      // 神聖琥珀金
+              goldLight: '#F7D08A', // 柔亮金
+              rabbit: '#F5F5F7',    // 白兔柔白
+              shrine: '#A83232',    // 鳥居硃紅
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 3s infinite',
+            'spin-slow': 'spin 15s linear infinite',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040814;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #E5A93B50;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E5A93Baa;
+    }
+
+    /* Elegant Cloud Pattern Divider for Header */
+    .shinto-cloud-divider {
+      position: relative;
+    }
+    .shinto-cloud-divider::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 16px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="%23E5A93B" opacity="0.35"><path d="M0,0 C150,90 350,90 500,0 C650,90 850,90 1000,0 C1100,60 1150,60 1200,0 L1200,120 L0,120 Z"></path><path d="M0,40 C150,110 350,110 500,40 C650,110 850,110 1000,40 C1100,90 1150,90 1200,40 L1200,120 L0,120 Z" fill="%23E5A93B" opacity="0.15"></path></svg>');
+      background-size: 100% 100%;
+    }
+
+    /* Twinkling star canvas background style */
+    canvas#starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Glow effect */
+    .glow-gold {
+      box-shadow: 0 0 15px rgba(229, 169, 59, 0.15);
+    }
+    .glow-gold-hover:hover {
+      box-shadow: 0 0 25px rgba(229, 169, 59, 0.35);
+      transition: all 0.3s ease;
+    }
+
+    /* Fade-in Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-izumo-deep text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-izumo-gold selection:text-izumo-deep">
+
+  <canvas id="starfield"></canvas>
+
+  <!-- React Root Container -->
+  <div id="root" class="relative z-10"></div>
+
+  <!-- React, ReactDOM, Babel for fully functional interactive Single Page App -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // 解決 React 無法直接解析 Markdown 粗體 ** 的問題，將其轉換為金色粗體 strong
+    const formatText = (text) => {
+      if (!text) return "";
+      const parts = text.split(/\*\*([\s\S]*?)\*\*/g);
+      return parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="text-amber-300 font-bold">{part}</strong> : part);
+    };
+
+    // --- Custom SVG Icons for Unique Theme Feeling ---
+    const ToriiIcon = ({ className = "w-6 h-6" }) => (
+      <svg viewBox="0 0 100 100" className={className} fill="currentColor">
+        <path d="M10 25 h80 v6 h-12 v50 h-8 v-50 h-40 v50 h-8 v-50 h-12 z M15 15 q35 -8, 70 0 v6 q-35 -8, -70 0 z" />
+      </svg>
+    );
+
+    const RabbitIcon = ({ className = "w-6 h-6" }) => (
+      <svg viewBox="0 0 100 100" className={className} fill="currentColor">
+        <path d="M70 20 c5 -10, 15 -10, 18 -3 c3 8, -5 23, -10 28 c3 10, 1 20, -5 27 c-8 8, -20 10, -28 5 c-10 1, -18 -4, -22 -12 c-4 -8, -1 -18, 5 -23 c4 -3, 10 -5, 15 -2 c3 -12, 10 -25, 17 -30 c5 -4, 11 -2, 10 10 z M63 42 c2 0, 4 -2, 4 -4 s-2 -4, -4 -4 s-4 2, -4 4 s2 4, 4 4 z M15 78 c2 -2, 10 -2, 15 2 c3 3, 2 10, -2 12 c-8 4, -25 3, -20 -8 z M35 80 c4 1, 15 5, 25 1 c12 -5, 20 -15, 30 -5 c6 6, 2 15, -10 14 c-20 -2, -35 -1, -45 -10 z" />
+      </svg>
+    );
+
+    const CloudIcon = ({ className = "w-6 h-6" }) => (
+      <svg viewBox="0 0 100 100" className={className} fill="currentColor">
+        <path d="M25 60 c-10 0, -15 -8, -10 -15 c2 -3, 6 -5, 10 -3 c1 -12, 12 -20, 22 -16 c5 2, 8 7, 9 12 c8 -8, 22 -5, 26 5 c5 -1, 10 2, 11 7 c2 8, -5 15, -13 15 c-4 0, -42 0, -55 0 z M50 75 c-5 0, -30 0, -35 -5 c-3 -3, -1 -8, 4 -9 c15 -1, 30 1, 35 4 c3 2, 1 10, -4 10 z" />
+      </svg>
+    );
+
+    // --- Complete Schedule Data (100% Traditional Chinese & Updated Flights with new stage play poster) ---
+    const ITINERARY_DATA = [
+      {
+        day: 1,
+        date: "6/8",
+        dayOfWeek: "週一",
+        theme: "降臨山陰・美食啟航",
+        desc: "搭乘 IT724 航班降落境港，從米子空港踏入神話之地，搭乘電車抵達鳥取，享用頂級在地燒肉補足元氣！",
+        spots: [
+          {
+            time: "12:00",
+            name: "米子鬼太郎機場",
+            jpName: "米子鬼太郎空港 (Yonago Airport)",
+            desc: "⭐ **搭乘 IT724 航班於 12:00 抵達**。以妖怪漫畫大師水木茂筆下角色命名的趣味機場，開啟山陰奇幻之旅。",
+	    notice: "※在空港1樓7-11寄送行李到松江住宿(野津旅館)",
+            guide: "從機場大廳步行即可抵達「境線」的米子空港車站。配合航班降落，出關後可以稍微參觀機場，並前往月台等候特急或普通車班次。",
+            bunnyTip: "機場到處都是鬼太郎的彩繪與銅像！行李轉盤上還會有一顆巨大的 **「眼珠老爹」** 迎接你，別忘了拍照留念喔！",
+            mapUrl: "https://maps.google.com/?q=米子鬼太郎空港,鳥取県",
+            embedQuery: "米子鬼太郎空港,鳥取県",
+            icon: "fa-plane-arrival",
+            type: "transport"
+          },
+          {
+            time: "13:15",
+            name: "米子車站",
+            jpName: "米子駅 (Yonago Station)",
+            desc: "山陰地方的重要鐵道樞紐，轉乘 JR 特急前往鳥取，沿途欣賞日本海波瀾壯闊的風光。",
+	    notice: "※在米子車站將kkday上買的JR鳥取‧松江區域周遊3日券換成實體票",
+            guide: "若持有「JR山陰地區鐵路周遊券」，可直接走人工通道出示搭乘。特急列車通常在特定的 2、3 號月台發車。",
+            bunnyTip: "米子車站月台設有極具特色的「鬼太郎妖怪車站」牌子（別名靈番線），等車時不妨找找藏在長椅下的驚喜。",
+            mapUrl: "https://maps.google.com/?q=米子駅,鳥取県",
+            embedQuery: "米子駅,鳥取県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "15:00",
+            name: "鳥取車站",
+            jpName: "鳥取駅 (Tottori Station)",
+            desc: "抵達鳥取市中心，周邊洋溢著悠閒的城市氛圍，在此準備前往飯店辦理入住手續。",
+            guide: "鳥取車站不大，出站後左手邊即是觀光案內所，可在此詢問隔天計程車方案的預約狀況。",
+            bunnyTip: "站前廣場偶爾會展示巨大的 **「因幡傘舞」** 裝飾，大廳內也有滿滿的柯南與鬼太郎周邊迎接大家！",
+            mapUrl: "https://maps.google.com/?q=鳥取駅,鳥取県",
+            embedQuery: "鳥取駅,鳥取県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "15:15",
+            name: "住宿: Tottori Green Hotel Morris",
+            jpName: "鳥取グリーンホテルモーリス",
+            desc: "超高評價商務旅館！提供寬敞舒適的客房，多種溫馨枕頭可供選擇，並設有大浴場舒緩舟車勞頓。",
+            guide: "車站北口出站後直行，步行約 2~3 分鐘即可抵達。辦理手續迅速，大廳還提供多款不同軟硬度的枕頭供免費租借。",
+            bunnyTip: "記得去體驗他們的大浴場！晚上大廳還備有免費的茶水咖啡，床墊極度舒適，絕對能讓你一夜好眠。",
+            mapUrl: "https://maps.google.com/?q=鳥取グリーンホテルモーリス",
+            embedQuery: "鳥取グリーンホテルモーリス",
+            icon: "fa-hotel",
+            type: "hotel"
+          },
+          {
+            time: "18:00",
+            name: "晚餐: 鳥取燒肉",
+            jpName: "焼肉牛王 鳥取駅北口店",
+            desc: "品嚐頂級「鳥取和牛萬葉牛」，肉質細緻、油脂入口即化。體驗舌尖上的極致美味。",
+            guide: "萬葉牛燒肉人氣極高，**強烈建議提早線上預約**，否則現場可能一位難求。",
+            bunnyTip: "鳥取萬葉牛的油脂熔點極低，烤到雙面微金黃、中間帶點粉紅時最美味，搭配在地的大山芥末泥，簡直是人間美味！",
+            mapUrl: "https://maps.google.com/?q=焼肉牛王 鳥取駅北口店,鳥取県",
+            embedQuery: "焼肉牛王 鳥取駅北口店,鳥取県",
+            icon: "fa-utensils",
+            type: "food"
+          }
+        ]
+      },
+      {
+        day: 2,
+        date: "6/9",
+        dayOfWeek: "週二",
+        theme: "沙丘白兔與偵探冒險",
+        desc: "利用超划算的『外國遊客專用計程車方案』輕鬆暢遊鳥取經典景點，隨後搭乘JR特急前往松江宍道湖畔入宿古雅旅館。",
+        spots: [
+          {
+            time: "09:00",
+            name: "鳥取城跡",
+            jpName: "鳥取城跡・久松公園 (Tottori Castle Ruins)",
+            desc: "國家指定史蹟。戰國時期豐臣秀吉曾在此展開著名的圍城戰。現今則為櫻花與翠綠環繞的幽靜庭園。",
+            notice: "※在鳥取市国際観光客サポートセンター現場使用計程車方案6000日圓，選擇鳥取沙丘路線B(終點鳥取砂丘柯南機場)",
+            guide: "計程車司機會在飯店大廳接駁，車程約 10 分鐘抵達。此處樓梯較多，需步行爬上久松山城郭遺跡。",
+            bunnyTip: "鳥取城又被稱為「天球丸」，擁有日本唯一的圓形石垣。從上方眺望鳥取市區視野極佳，春天時這裡更是粉紅櫻花海洋！",
+            mapUrl: "https://maps.google.com/?q=鳥取城跡,鳥取県",
+            embedQuery: "鳥取城跡,鳥取県",
+            icon: "fa-taxi",
+            type: "sight"
+          },
+          {
+            time: "10:30",
+            name: "鳥取沙丘",
+            jpName: "鳥取砂丘 (Tottori Sand Dunes)",
+            desc: "日本規模最大的觀光沙丘。狂風雕刻出的美麗「風紋」令人屏息。可攀登高達47公尺的「馬之背」，眺望波瀾壯闊的日本海。",
+            guide: "計程車會停在沙丘會館前，攀爬「馬之背」斜坡非常耗體力，且細沙容易進鞋，建議在入口處租借免費拖鞋或沙地專用鞋。",
+            bunnyTip: "如果風夠大，你可以拍到極美的 **「風紋」**。白兔推薦你爬上頂端，右邊是壯闊的日本海，left是無垠的黃沙，非常震撼！",
+            mapUrl: "https://maps.google.com/?q=鳥取砂丘,鳥取県",
+            embedQuery: "鳥取砂丘,鳥取県",
+            icon: "fa-umbrella-beach",
+            type: "sight"
+          },
+          {
+            time: "12:30",
+            name: "白兔神社",
+            jpName: "白兎神社 (Hakuto Shrine)",
+            desc: "⭐ **重要主題景點**。日本神話「因幡之白兔」的發源地，也是全日本著名的「戀人聖地」。神社內布滿各種姿態的白兔石雕，可購買可愛的白兔御守與陶製御神籤！",
+            guide: "神社位於白兔海岸旁，計程車停妥後走上鳥居階梯。參拜完可以到旁邊的「道路之驛」購買神話特產與白兔冰淇淋。",
+            bunnyTip: "⭐ **我們的本陣！** 階梯兩旁有無數隻萌萌的白兔石雕。記得在社務所買一包 **「結緣石（結び石）」**，試著拋到鳥居橫樑上，掉不下來就代表良緣將至喔！",
+            mapUrl: "https://maps.google.com/?q=白兎神社,鳥取県",
+            embedQuery: "白兎神社,鳥取県",
+            icon: "fa-heart",
+            type: "shrine"
+          },
+          {
+            time: "14:00",
+            name: "鳥取砂丘柯南機場",
+            jpName: "鳥取砂丘コナン空港 (Tottori Conan Airport)",
+            desc: "名偵探柯南主題機場！到處都是作者青山剛昌筆下的角色立牌、彩繪與解謎互動裝置，粉絲絕對拍到手軟。",
+            guide: "這也是計程車方案的終點站（或可在此結束行程）。機場內各角落都布滿了柯南解謎地圖與實體大小塑像。",
+            bunnyTip: "機場大廳有巨大的怪盜基德與柯南 3D 擬真地景彩繪，甚至連行李提領轉盤都有柯南的蹤影，柯南迷一定要預留一小時瘋狂拍照！",
+            mapUrl: "https://maps.google.com/?q=鳥取砂丘コナン空港",
+            embedQuery: "鳥取砂丘コナン空港",
+            icon: "fa-magnifying-glass",
+            type: "sight"
+          },
+          {
+            time: "16:00",
+            name: "松江駅",
+            jpName: "松江駅 (Matsue Station)",
+            desc: "搭乘JR特急抵達「水之都」松江市。松江以豐富的茶文化與宍道湖夕陽聞名。",
+            guide: "搭乘特急從鳥取大學前到松江約 1.2 小時。出站後可利用站前巴士轉運站前往市區各景點，也可步行前往野津旅館（約 8-10 分鐘）。",
+            bunnyTip: "歡迎來到松江！車站內部的土產店有豐富的「島根結緣蜆貝」相關零食，也是購買一畑電車一日券的好地方。",
+            mapUrl: "https://maps.google.com/?q=松江駅,島根県",
+            embedQuery: "松江駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "17:00",
+            name: "住宿: 野津旅館",
+            jpName: "野津旅館 (Notsu Ryokan)",
+            desc: "座落於松江川畔的傳統和風溫泉旅館。在這裡可以體驗傳統榻榻米客房與頂級露天溫泉，洗滌全身疲憊。",
+            guide: "位於大橋川畔，外觀古色古香。辦理入住手續後服務人員會協助挑選喜愛的精緻浴衣款式。",
+            bunnyTip: "晚上的露天溫泉 **「展望大浴殿」** 可以一邊泡湯一邊看著河川夜景，消除一整天沙丘與參拜的疲勞，身心舒暢！",
+            mapUrl: "https://maps.google.com/?q=野津旅館,島根県",
+            embedQuery: "野津旅館,島根県",
+            icon: "fa-hotel",
+            type: "hotel"
+          }
+        ]
+      },
+      {
+        day: 3,
+        date: "6/10",
+        dayOfWeek: "週三",
+        theme: "千鳥古城與庭園巨擘",
+        desc: "探訪現存十二天守之一的松江城，搭乘搖櫓船穿梭護城河，午後探訪連年日本第一的足立美術館庭園，傍晚在宍道湖畔賞落日。",
+        spots: [
+          {
+            time: "09:00",
+            name: "松江城",
+            jpName: "松江城 (Matsue Castle)",
+            desc: "日本國寶五城之一，因屋簷猶如千鳥展翅而得名。登上頂樓天守閣可360度俯瞰松江市街與宍道湖。",
+            guide: "從旅館搭乘巴士或散步約 15 分鐘可達。登上天守閣內部樓梯非常陡峭（接近 90 度），請務必抓穩扶手、小心慢行。",
+	    notice: "※可以使用DA Japan的山陰一日券",
+            bunnyTip: "這是全日本僅存的 12 座天守之一！別忘了尋找天守閣支柱上特別的 **「心形木紋」**，據說找到的情侶會獲得一輩子的幸福喔！",
+            mapUrl: "https://maps.google.com/?q=松江城,島根県",
+            embedQuery: "松江城,島根県",
+            icon: "fa-chess-rook",
+            type: "sight"
+          },
+          {
+            time: "10:30",
+            name: "堀川遊覽船",
+            jpName: "堀川めぐり (Horikawa Pleasure Boat)",
+            desc: "搭乘傳統木製扁舟穿梭松江城的護城河。船夫會吟唱民謠，在通過低矮橋梁時，船頂棚還會自動降下，極具趣味！",
+            guide: "乘船場就在松江城旁。每艘船皆有暖桌（冬季）或遮陽棚（夏季）。航程約 50 分鐘，中途有多個上下船點。",
+	    notice: "※可以使用DA Japan的山陰一日券",
+            bunnyTip: "船老大會一邊搖櫓一邊高歌松江民謠。最刺激的是經過極低橋樑時，**整座棚頂會自動降下來**，全體遊客要一起趴在榻榻米上，非常趣味！",
+            mapUrl: "https://maps.google.com/?q=堀川めぐり乗船場,島根県",
+            embedQuery: "堀川めぐり乗船場,島根県",
+            icon: "fa-ship",
+            type: "sight"
+          },
+          {
+            time: "12:00",
+            name: "Ronjin Matsue",
+            jpName: "西洋料理 ろんぢん 松江本店 (Rondin)",
+            desc: "松江城旁的優雅老鋪，裝潢洋溢大正浪漫風情。提供極具水準的特製壽喜燒、涮涮鍋以及經典日式洋食。",
+            guide: "就在松江城大手前，走下堀川遊覽船後即可直接步行抵達。極具大正風情，用餐環境高雅安靜。",
+            bunnyTip: "招牌是他們的 **「特選牛壽喜燒」** 與精緻和風洋食。大正時代的復古吊燈與木質裝潢，讓你彷彿穿梭時空化身優雅文青。",
+            mapUrl: "https://maps.google.com/?q=西洋料理+ろんぢん+松江本店",
+            embedQuery: "西洋料理 ろんぢん 松江本店, 島根県",
+            icon: "fa-utensils",
+            type: "food"
+          },
+          {
+            time: "13:30",
+            name: "安來車站",
+            jpName: "安来駅 (Yasugi Station)",
+            desc: "搭乘電車前往安來，此處為著名的「泥鰍舞（安來節）」發源地，火車站設計充滿溫暖木質調。",
+            guide: "從松江搭 JR 普通車約 20 分鐘即可抵達安來。車站大廳內有非常寬敞的休息區，足立美術館的專用接駁巴士站就在出口右側。",
+            bunnyTip: "安來是傳統「泥鰍舞（安來節）」的故鄉。站內隨處可見頭戴竹簍、鼻塞硬幣的逗趣泥鰍舞大叔人偶，讓人忍不住想跟著擺姿勢！",
+            mapUrl: "https://maps.google.com/?q=安来駅,島根県",
+            embedQuery: "安来駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "14:15",
+            name: "足立美術館",
+            jpName: "足立美術館 (Adachi Museum of Art)",
+            desc: "連續20年以上榮獲美國專業雜誌評為「日本第一庭園」。完美融合山水與近代日本畫作，落地窗框猶如「活生生的山水畫橫幅」。",
+            guide: "搭乘免費接駁巴士約 20 分鐘可達。館內完全禁止觸摸玻璃。庭園內亦不可步入，只能從館內的觀景窗或走廊「如畫作般」遠眺。",
+	    notice: "※可以使用DA Japan的山陰一日券，記得到了以後先拿回程接駁車的票",
+            bunnyTip: "連續 20 年蟬聯日本第一！最推 **「枯山水庭」** 與 **「生之額繪」**（用窗框框住庭園）。坐在大片落地窗前，點一杯抹茶，享受禪意靜謐時光吧！",
+            mapUrl: "https://maps.google.com/?q=足立美術館,島根県",
+            embedQuery: "足立美術館,島根県",
+            icon: "fa-images",
+            type: "sight"
+          },
+          {
+            time: "17:00",
+            name: "島根美術館",
+            jpName: "島根県立美術館 (Shimane Art Museum)",
+            desc: "建於宍道湖畔，被稱為「全日本最美夕陽美術館」。大片玻璃帷幕將夕陽餘暉納入館內，戶外的12隻「跳躍白兔」雕像更是熱門開運景點！",
+            guide: "位於宍道湖畔，建議安排在日落前 1.5 小時抵達。美術館後方大草皮是觀賞夕陽的絕佳位置，完全免費開放。",
+            bunnyTip: "戶外草皮有 12 隻 **「宍道湖兔兔」**。據說只要撫摸從湖邊數來「第二隻白兔」，並奉納蜆貝殼，就能保佑你的戀愛運大開！",
+            mapUrl: "https://maps.google.com/?q=島根県立美術館",
+            embedQuery: "島根県立美術館",
+            icon: "fa-palette",
+            type: "sight"
+          },
+          {
+            time: "19:00",
+            name: "住宿: 野津旅館",
+            jpName: "野津旅館 (Notsu Ryokan)",
+            desc: "續住這間溫馨的溫泉旅館。晚間可在松江市區尋訪在地老街居酒屋或品嚐宍道湖七珍美食。",
+            guide: "續住這間溫馨的溫泉旅館。如果您第一晚沒空去大浴場，今天晚上一定要好好的浸泡著名的溫泉，徹底舒展筋骨。",
+            bunnyTip: "出雲地區著名的蜆貝（しじみ）是明目的聖品！晚餐如果去居酒屋，強烈點一碗 **「宍道湖蜆貝味噌湯」**，暖胃又養身。",
+            mapUrl: "https://maps.google.com/?q=野津旅館,島根県",
+            embedQuery: "野津旅館,島根県",
+            icon: "fa-hotel",
+            type: "hotel"
+          }
+        ]
+      },
+      {
+        day: 4,
+        date: "6/11",
+        dayOfWeek: "週四",
+        theme: "神苑結緣・出雲聖域",
+        desc: "沿著一畑電車鐵道前往大社，參拜全日本地位崇高的出雲大社，走訪神話中八百萬神明降臨的稻佐之濱，晚間入住舒適的Dormy Inn。",
+        spots: [
+          {
+            time: "08:30",
+            name: "松江宍道湖溫泉車站",
+            jpName: "松江しんじ湖温泉駅 (Matsue Shinjiko-Onsen Station)",
+            desc: "搭乘復古風情的一畑電車，沿著寬闊的宍道湖畔，搖搖晃晃開啟結緣鐵道之旅。",
+            guide: "一畑電車起點站。站外設有免費的「臨站足湯」，在等車的空檔可以脫下鞋襪泡泡腳，溫暖一下。",
+            notice: "※在松江宍道湖溫泉車站可以寄送行李到有人的車站，送到電鐵出雲車站",
+            bunnyTip: "搭乘一畑電車時，強烈推薦坐在左側車窗！這樣就可以一整路飽覽波光粼粼的 **「宍道湖」** 絕美湖景，十分舒心。",
+            mapUrl: "https://maps.google.com/?q=松江しんじ湖温泉駅,島根県",
+            embedQuery: "松江しんじ湖温泉駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "09:15",
+            name: "雲州平田車站",
+            jpName: "雲州平田駅 (Unshu-Hirata Station)",
+            desc: "一畑電車的車輛基地所在地，富含老街生活氣息與鐵道懷舊感。",
+            guide: "這裡是電車的中途大站，一畑電車的大本營。如果您對老街木綿街道有興趣可在此下車走走，否則一般在車上欣賞風景即可。",
+            bunnyTip: "這裡是日本鐵道電影《RAILWAYS》的主要拍攝基地，月台上常停靠著復古的一畑橘色經典電車，鐵道迷必拍！",
+            mapUrl: "https://maps.google.com/?q=雲州平田駅,島根県",
+            embedQuery: "雲州平田駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "09:45",
+            name: "宇美神社",
+            jpName: "宇美神社 (Umi Shrine)",
+            desc: "極具特色的「惡緣切除・良緣結締」神社。在此可以進行斷絕惡緣（如惡習、小人）的獨特儀式，祈求重獲新生。",
+            guide: "從雲州平田站步行約 8-10 分鐘可達。神社藏在安靜的住宅區，氛圍非常肅穆清幽。",
+            bunnyTip: "⭐ **全日本極少見的「斷惡緣、結良緣」神社！** 在社務所購買「緣切・緣結特製繪馬」，先在神前斬斷惡習、疾病或小人，再祈求美好良緣降臨。",
+            mapUrl: "https://maps.google.com/?q=宇美神社,島根県",
+            embedQuery: "宇美神社,島根県",
+            icon: "fa-scissors",
+            type: "shrine"
+          },
+          {
+            time: "11:15",
+            name: "出雲大社前車站",
+            jpName: "出雲大社前駅 (Izumo-taisha-mae Station)",
+            desc: "極具西洋彩色玻璃窗風格的典雅車站，站內還保留著珍貴的古典電車頭可供拍照留念。",
+            guide: "抵達出雲大社的玄關。車站外觀是獨特的西方洋風教堂拱窗與彩繪玻璃設計，十分典雅好拍。",
+            bunnyTip: "車站旁展示著一輛有 100 年歷史、全日本最古老的 **「デハニ50形」** 古典木造電車。你可以進去車廂內自由坐著拍照，體驗昭和浪漫！",
+            mapUrl: "https://maps.google.com/?q=出雲大社前駅,島根県",
+            embedQuery: "出雲大社前駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "11:45",
+            name: "午餐: 蕎麦処 八雲 東店",
+            jpName: "蕎麦処 八雲 東店 (Yakumo Soba)",
+            desc: "來到出雲必吃著名的「割子蕎麥麵」。使用三層朱紅色漆器盛裝，麵條香氣濃郁、口感Q彈，搭配特製醬汁，美味完美無瑕！",
+            guide: "位於出雲大社神苑旁，步行約 3 分鐘。中午用餐時間人潮洶湧，建議一到大社前先來登記排隊以節省時間。",
+            bunnyTip: "必點 **「五段割子蕎麥麵」**！出雲蕎麥是連皮一起磨製，麵體偏黑香氣極濃。吃法是將特製醬汁直接淋入第一層，吃完後把剩餘醬汁倒進第二層，以此類推享受漸進風味！",
+            mapUrl: "https://maps.google.com/?q=蕎麦処+八雲+東店,島根県",
+            embedQuery: "蕎麦処 八雲 東店,島根県",
+            icon: "fa-utensils",
+            type: "food"
+          },
+          {
+            time: "13:00",
+            name: "出雲大社",
+            jpName: "出雲大社 (Izumo Oyashiro)",
+            desc: "⭐ **行程核心殿堂**！供奉大國主大神，為日本首屈一指的結緣神殿。神樂殿懸掛著重達5.2噸、全日本最大的「注連繩」，壯麗非凡。參拜方式為特殊的「二禮、四拍手、一禮」。",
+            guide: "大社參道為平緩下坡，依序會經過四座宏偉大鳥居。本殿一般是不對外開放的，主參拜與朱印都在「拜殿」與「神樂殿」。",
+            bunnyTip: "⭐ **眾神聚集之巔！** 神樂殿那根 5.2 噸重的巨大注連繩極其震撼。出雲大社參拜是獨特的 **「二禮、四拍手、一禮」**，多拍兩下代表為自己和旅伴祈求雙倍良緣！",
+            mapUrl: "https://maps.google.com/?q=出雲大社,島根県",
+            embedQuery: "出雲大社,島根県",
+            icon: "fa-gopuran",
+            type: "shrine"
+          },
+          {
+            time: "16:00",
+            name: "稻佐之濱",
+            jpName: "稲佐の浜 (Inasa Beach)",
+            desc: "神話中每年舊曆十月（神在月），全日本八百萬神明登陸的聖地。海灘上聳立著一座巨大岩石「弁天島」，在夕陽映照下猶如神蹟。",
+            guide: "從出雲大社步行約 15-20 分鐘（約 1.2 公里）或搭乘巴士。建議在傍晚日落時分前來，海風極強，請務必做好保暖防風。",
+            bunnyTip: "這裡是神在月時八百萬神明登陸的起點。岩石上的「弁天島」非常神聖。記得準備一個塑膠袋，**在這裡裝一點細沙**，帶去出雲大社後的素鵞社奉納換神砂！",
+            mapUrl: "https://maps.google.com/?q=稲佐の浜,島根県",
+            embedQuery: "稲佐の浜,島根県",
+            icon: "fa-sun",
+            type: "sight"
+          },
+          {
+            time: "17:30",
+            name: "電鐵出雲市車站",
+            jpName: "電鉄出雲市駅 (Dentetsu-Izumoshi Station)",
+            desc: "一畑電車的終點站，與 JR 出雲市站相鄰，周圍交通與飲食機能十分發達。",
+            guide: "搭乘一畑電車大社線回到出雲市市中心. 車站旁有許多土產伴手禮店，並與 JR 出雲市站緊鄰，是補給的好去處。",
+            bunnyTip: "車站的外觀特地做成類似出雲大社神殿的屋頂結構，十分莊嚴。站內有島根吉祥物 **「島根貓（しまねっこ）」** 的巨型公仔可以合照！",
+            mapUrl: "https://maps.google.com/?q=電鉄出雲市駅,島根県",
+            embedQuery: "電鉄出雲市駅,島根県",
+            icon: "fa-train",
+            type: "transport"
+          },
+          {
+            time: "18:00",
+            name: "住宿: Dormy Inn出雲",
+            jpName: "天然温泉 八雲の湯 ドーミーイン出雲",
+            desc: "位於車站旁。頂樓設有天然溫泉「八雲之湯」，並於晚間提供無限量免費「夜鳴拉麵」，是自助旅行的超級綠洲！",
+            guide: "出雲市站南口出站即達。Dormy Inn 溫泉「八雲之湯」位於頂樓，入住後即可憑房卡隨時享用大浴場溫泉。",
+            bunnyTip: "晚上 21:30 ~ 23:00 絕對不要錯過大廳免費提供的 **「夜鳴醬油拉麵」**。泡完暖呼呼的溫泉、喝瓶當地大山牛奶再吃碗熱拉麵，是旅人的終極幸福！",
+            mapUrl: "https://maps.google.com/?q=天然温泉+八雲の湯+ドーミーイン出雲",
+            embedQuery: "天然温泉 八雲の湯 ドーミーイン出雲",
+            icon: "fa-hotel",
+            type: "hotel"
+          }
+        ]
+      },
+      {
+        day: 5,
+        date: "6/12",
+        dayOfWeek: "週五",
+        theme: "飛躍東京・落語紙芝居",
+        desc: "由出雲機場搭機直飛東京。午後辦理入住，晚間 19:00 前往品川區六行會大廳，欣賞備受期待的日本傳統藝術結合舞台劇首演《カミシバイ-閉-》。",
+        spots: [
+          {
+            time: "11:55",
+            name: "出雲結緣機場",
+            jpName: "出雲縁結び空港 (Izumo Airport)",
+            desc: "⭐ **搭乘 JL280 航班於 11:55 起飛**。別名「結緣機場」，準備直飛往東京羽田機場，省去新幹線轉乘繁瑣。",
+	    notice: "※可以搭機場機場聯絡巴士",
+            guide: "從出雲市站搭乘機場聯絡巴士約 25 分鐘。日本國內線登機手續相對簡單，但仍建議提早 1 小時抵達辦理登記與行李託運。",
+            bunnyTip: "這裡又被稱為「出雲結緣機場」，到處都是七福神跟神話裝飾。機場二樓有非常豐富的島根限定伴手禮，適合做最後的掃貨！",
+            mapUrl: "https://maps.google.com/?q=出雲空港,島根県",
+            embedQuery: "出雲空港,島根県",
+            icon: "fa-plane-departure",
+            type: "transport"
+          },
+          {
+            time: "13:15",
+            name: "羽田機場",
+            jpName: "羽田空港 (Haneda Airport)",
+            desc: "⭐ **JL280 航班於 13:15 抵達**。踏入繁忙繁華的東京，出關後直接轉乘京急線直奔品川、大森一帶。",
+            guide: "降落後跟隨指標搭乘京急線直通急行列車，約 25-30 分鐘可達品川或大森地區，免去繁複轉乘極為便利。",
+            bunnyTip: "歡迎來到繁華的東京！羽田機場二樓的 **「江戶小路」** 復古街景非常有特色，有時間的話可以在那裡先來碗熱騰騰的日式拉麵或烏龍麵喔！",
+            mapUrl: "https://maps.google.com/?q=羽田空港,東京都",
+            embedQuery: "羽田空港,東京都",
+            icon: "fa-plane-arrival",
+            type: "transport"
+          },
+          {
+            time: "14:30",
+            name: "住宿: JR東日本HOTEL METS 大森",
+            jpName: "JR東日本ホテルメッツ 大森 (JR East Hotel Mets Omori)",
+            desc: "直通JR大森站，位置優越。房間設計極具現代日式美學，隔音優良且床墊極佳。",
+            guide: "車站大廳直通飯店大廳（共構），免出站、免淋雨，極度便利。周邊有 atre 百貨、各式藥妝與生鮮超市，生活機能完美。",
+            bunnyTip: "飯店設計結合現代簡約與舒適原木風格，房間大片景觀窗採光極佳，浴室也相當寬敞，是鬧中取靜的高質感東京綠洲。",
+            mapUrl: "https://maps.google.com/?q=ＪＲ東日本ホテルメッツ+大森",
+            embedQuery: "ＪＲ東日本ホテルメッツ 大森,東京都",
+            icon: "fa-hotel",
+            type: "hotel"
+          },
+          {
+            time: "19:00",
+            name: "舞台劇: カミシバイ-閉-",
+            jpName: "舞台：カミシバイ-閉- (於 六行会ホール)",
+            desc: "⭐ **19:00 開演**。於新馬場站附近的「六行會大廳（六行会ホール）」正式開演！欣賞融合日式傳統連連看與現代話劇的精彩大戲，感受震撼的心靈共鳴。",
+            guide: "從大森搭 JR 京濱東北線至大井町轉乘，或搭乘京急線至新馬場站，步行 2 分鐘即可抵達「六行會大廳」。首演場強烈建議提早 30-40 分鐘入場。",
+            bunnyTip: "⭐ **首演夜來臨！** 主視覺海報充滿了神秘的昭和紙芝居與現代話劇交融感。記得提早在劇場大廳購買場刊或限量劇照周邊，給演員們最熱烈的支持！",
+            mapUrl: "https://maps.google.com/?q=六行会ホール,東京都",
+            embedQuery: "六行会ホール,東京都",
+            icon: "fa-ticket",
+            type: "sight",
+            imageUrl: "https://pbs.twimg.com/media/HCpG0AYacAAq5UM?format=jpg&name=large"
+          }
+        ]
+      },
+      {
+        day: 6,
+        date: "6/13",
+        dayOfWeek: "週六",
+        theme: "都會綠洲・經典再現",
+        desc: "在繁華的東京尋找幽靜。拜訪隱匿於新橋的繽紛烏森神社，午後遊歷品川御殿山靜謐庭園，今日更迎來 13:00 與 18:00 的雙場舞台劇視聽饗宴。",
+        spots: [
+          {
+            time: "10:00",
+            name: "烏森神社",
+            jpName: "烏森神社 (Karasumori Shrine)",
+            desc: "隱身在新橋水泥叢林中的現代感神社。以保佑「演藝與商業」以及「四色超繽紛御朱印」而聞名，深受文創愛好者喜愛。",
+            guide: "搭乘 JR 山手線至新橋站，從烏森口出站步行約 2 分鐘，神社隱藏在小餐館與餐飲居酒屋林立的窄巷內。",
+            bunnyTip: "這裡的現代清水模鳥居與色彩繽紛的 **「四色御朱印」** 聞名全日本！粉紅（戀愛）、綠（健康）、黃（財運）、藍（厄除），求完朱印還會送可愛的守護糖果喔！",
+            mapUrl: "https://maps.google.com/?q=烏森神社,東京都",
+            embedQuery: "烏森神社,東京都",
+            icon: "fa-gopuran",
+            type: "shrine"
+          },
+          {
+            time: "11:30",
+            name: "御殿山庭園",
+            jpName: "御殿山庭園 (Gotenyama Garden)",
+            desc: "曾是德川將軍狩獵放鷹與賞櫻的名所。現為都市綠洲，擁有茂密景觀植被、清澈水流與古典茶室，氣氛靜謐高雅。",
+            guide: "位於品川御殿山，可從品川站步行約 10 分鐘或轉乘接駁巴士。庭園依傍著東京萬豪酒店，環境極為幽靜雅致。",
+            bunnyTip: "這是一處隱藏在東京市中心的「將軍級綠洲」。小橋流水與茂密櫻花木、紅葉林錯落有致。在觀看下午公演前，來這裡散步，能幫身心靈充飽電！",
+            mapUrl: "https://maps.google.com/?q=御殿山庭園,東京都",
+            embedQuery: "御殿山庭園,東京都",
+            icon: "fa-tree",
+            type: "sight"
+          },
+          {
+            time: "13:00",
+            name: "舞台劇午間場: カミシバイ-閉-",
+            jpName: "舞台：カミシバイ-閉- (於 六行会ホール)",
+            desc: "⭐ **午間場 13:00 開演**。在日光與劇場光影交織的時間點步入劇場，以另一種神采飛揚的視角體味演員在舞台上揮灑的熱忱。",
+            guide: "13:00 開演。新馬場站周邊有許多傳統日式咖啡廳，建議在 12:15 前用完簡餐，以便從容散步進入六行會大廳入座。",
+            bunnyTip: "午間場的觀眾群氣氛往往更為活潑！坐在劇場中，能近距離看見舞台服飾與演員在燈光下的眼神轉變，第二度觀看能看到許多首演忽略的細節喔！",
+            mapUrl: "https://maps.google.com/?q=六行会ホール,東京都",
+            embedQuery: "六行会ホール,東京都",
+            icon: "fa-ticket",
+            type: "sight",
+            imageUrl: "https://pbs.twimg.com/media/HJUU3IIbAAEWA0l?format=jpg&name=large"
+          },
+          {
+            time: "18:00",
+            name: "舞台劇晚間場: カミシバイ-閉-",
+            jpName: "舞台：カミシバイ-閉- (於 六行会ホール)",
+            desc: "⭐ **晚間場 18:00 開演（非千秋樂）**。二度體味這部融合經典劇作，細細解析每一幕伏筆、對白與舞台張力，讓這場聽覺與視覺的交響曲深印腦海。",
+            guide: "18:00 開演。兩場演出中間有大約 3 小時空檔，可以到新馬場附近的舊東海道古街道散步，或回大森飯店稍作休息再前來。",
+            bunnyTip: "這場雖然非最終千秋樂，但倒數場次往往能看到演員們在舞台上更加釋放、爐火純青的演技。帶著今日兩次觀劇的震撼，在謝幕時用力拍手吧！",
+            mapUrl: "https://maps.google.com/?q=六行会ホール,東京都",
+            embedQuery: "六行会ホール,東京都",
+            icon: "fa-ticket",
+            type: "sight",
+            imageUrl: "https://pbs.twimg.com/media/HFDaIpTbcAETcjj?format=jpg&name=large"
+          },
+          {
+            time: "21:30",
+            name: "住宿: JR東日本HOTEL METS 大森",
+            jpName: "JR東日本ホテルメッツ 大森 (JR East Hotel Mets Omori)",
+            desc: "續住。晚間可在大森站周邊的居酒屋享用宵夜，回味幾天來令人難忘的旅程片段。",
+            guide: "續住。看完兩場極具衝擊力的戲劇後，搭電車直達大森。大森站東口方向有許多極具風情的串燒居酒屋和深夜拉麵店。",
+            bunnyTip: "兩天密集的東京看戲散步行程是否有些疲倦？回到飯店浴缸放滿熱水好好泡個熱水澡，沉澱這兩天舞台劇帶給心靈的滿滿感動吧！",
+            mapUrl: "https://maps.google.com/?q=ＪＲ東日本ホテルメッツ+大森",
+            embedQuery: "ＪＲ東日本ホテルメッツ 大森,東京都",
+            icon: "fa-hotel",
+            type: "hotel"
+          }
+        ]
+      },
+      {
+        day: 7,
+        date: "6/14",
+        dayOfWeek: "週日",
+        theme: "歸途與豐收",
+        desc: "整理行李與滿滿的回憶，搭乘特急抵達成田機場，搭乘 TR867 返回台灣，帶著結緣白兔守護的良緣順利歸國。",
+        spots: [
+          {
+            time: "12:30",
+            name: "成田機場",
+            jpName: "成田国際空港 (Narita Airport)",
+            desc: "⭐ **搭乘 TR867 航班於 12:30 出發**。辦理登機手續，進行免稅伴手禮最後採購！",
+            guide: "從大森搭車至品川，轉乘「成田特快 N'EX」直達機場，車程約 1 小時 15 分鐘。TR867 航班 12:30 起飛，建議最晚於 **10:00 前抵達機場櫃檯辦理登機與行李託運**。",
+            bunnyTip: "成田機場是最後的土產採購天堂！各大免稅店都有東京限定零食。別忘了檢查隨身行李，千萬不要把在出雲求到的開運御守或繪馬留在飯店喔！",
+            mapUrl: "https://maps.google.com/?q=成田国際空港",
+            embedQuery: "成田国際空港",
+            icon: "fa-plane-departure",
+            type: "transport"
+          },
+          {
+            time: "15:10",
+            name: "桃園機場",
+            jpName: "桃園國際機場 (Taoyuan Airport)",
+            desc: "⭐ **TR867 航班於 15:10 平安抵達**。平安返抵台灣，結緣與神話之旅圓滿成功！期待下一次與眾神的再次相遇。",
+            guide: "降落桃園國際機場。提領行李、順利通過海關後，即可搭乘機場捷運、預約客運或接駁車溫馨返家。",
+            bunnyTip: "歡迎回家！出雲大國主大神與因幡白兔守護的 7 天星空結緣之旅圓滿落幕。帶回家的 **「開運神砂」** 可以放在家中玄關，能保佑避邪與迎來幸福良緣喔！",
+            mapUrl: "https://maps.google.com/?q=桃園國際機場",
+            embedQuery: "桃園國際機場",
+            icon: "fa-home",
+            type: "transport"
+          }
+        ]
+      }
+    ];
+
+    // --- Predefined Realistic Transit Schedules (Updated with Flights) ---
+    const PRESET_TIMETABLES = [
+      {
+        id: "t01",
+        day: 1,
+        title: "米子空港 ➔ 米子駅 (JR 境線)",
+        time: "12:49 - 13:18",
+        transport: "JR 境線 (鬼太郎彩繪列車)",
+        details: "單程 ¥240。剛好銜接 IT724 航班 12:00 降落後的出關時間。車程約28分鐘。"
+      },
+      {
+        id: "t02",
+        day: 1,
+        title: "米子空港 ➔ 米子駅",
+        time: "13:25 - 13:53",
+        transport: "米子鬼太郎空港連絡バス[日ノ丸自動車]",
+        details: "後門上車，下車付款，可用IC卡。車程約28分鐘。"
+      },
+      {
+        id: "t03",
+        day: 1,
+        title: "米子空港 ➔ 米子駅",
+        time: "13:35 - 14:10",
+        transport: "日ノ丸自動車 [40]境港線（外浜線）",
+        details: "後門上車，可用IC卡。車程約35分鐘。"
+      },
+      {
+        id: "t04",
+        day: 1,
+        title: "米子空港 ➔ 米子駅 (JR 境線)",
+        time: "13:51 - 14:20",
+        transport: "JR 境線 (鬼太郎彩繪列車)",
+        details: "單程 ¥240。車程約28分鐘。"
+      },
+      {
+        id: "t05",
+        day: 1,
+        title: "米子空港 ➔ 米子駅",
+        time: "14:15 - 14:50",
+        transport: "日ノ丸自動車 [40]境港線（外浜線）",
+        details: "後門上車，可用IC卡。車程約35分鐘。"
+      },
+      {
+        id: "t06",
+        day: 1,
+        title: "米子空港 ➔ 米子駅 (JR 境線)",
+        time: "14:53 - 15:22",
+        transport: "JR 境線 (鬼太郎彩繪列車)",
+        details: "單程 ¥240。車程約28分鐘。"
+      },
+      {
+        id: "t07",
+        day: 1,
+        title: "米子空港 ➔ 米子駅",
+        time: "16:45 - 17:13",
+        transport: "米子鬼太郎空港連絡バス[日ノ丸自動車]",
+        details: "後門上車，下車付款，可用IC卡。車程約28分鐘。"
+      },
+      {
+        id: "t08",
+        day: 1,
+        title: "米子空港 ➔ 米子駅",
+        time: "16:55 - 17:29",
+        transport: "日ノ丸自動車 [40]境港線（外浜線）",
+        details: "後門上車，可用IC卡。車程約35分鐘。"
+      },
+      {
+        id: "t09",
+        day: 1,
+        title: "米子駅 ➔ 鳥取駅 (JR 特急松風)",
+        time: "14:56 - 16:02",
+        transport: "特急スーパーまつかぜ１０号(鳥取行)",
+        details: "車程約1小時6分鐘。使用JR Pass自由席最佳。"
+      },
+      {
+        id: "t10",
+        day: 1,
+        title: "米子駅 ➔ 鳥取駅 (JR 特急隱岐)",
+        time: "17:14 - 18:19",
+        transport: "特急スーパーおき４号(鳥取行)",
+        details: "車程約1小時5分鐘。使用JR Pass自由席最佳。"
+      },
+      {
+        id: "t11",
+        day: 1,
+        title: "米子駅 ➔ 鳥取駅 (JR 特急松風)",
+        time: "18:38 - 19:43",
+        transport: "特急スーパーまつかぜ１２号(鳥取行)",
+        details: "車程約1小時5分鐘。使用JR Pass自由席最佳。"
+      },
+      {
+        id: "t21",
+        day: 2,
+        title: "外國人觀光計程車 (3小時暢遊)",
+        time: "09:00 - 12:00",
+        transport: "鳥取市專用觀光 Taxi",
+        details: "每人僅需約 ¥6,000 的超優惠方案。路線：鳥取城跡 ➔ 鳥取沙丘 ➔ 白兔神社 ➔ 柯南機場。"
+      },
+      {
+        id: "t22",
+        day: 2,
+        title: "鳥取大学前駅 ➔ 松江駅 (JR 特急隱岐)",
+        time: "13:57 - 15:19",
+        transport: "特急スーパーおき５号(新山口行)",
+        details: "特急列車直達，車程1小時22分。沿途可欣賞左側海岸線。"
+      },
+      {
+        id: "t23",
+        day: 2,
+        title: "鳥取大学前駅 ➔ 松江駅 (JR 特急松風)",
+        time: "15:19 - 16:44",
+        transport: "特急スーパーまつかぜ７号(益田行)",
+        details: "特急列車直達，車程1小時25分。沿途可欣賞左側海岸線。"
+      },
+      {
+        id: "t31",
+        day: 3,
+        title: "松江駅 ➔ 安來駅 (JR 電車)",
+        time: "13:30 - 13:51",
+        transport: "JR 山陰本線・普通列車",
+        details: "車程約21分鐘。安來站出站後，有免費足立美術館接駁巴士。"
+      },
+      {
+        id: "t32",
+        day: 3,
+        title: "安來駅 ➔ 足立美術館 (接駁車)",
+        time: "13:30 - 13:50",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t33",
+        day: 3,
+        title: "安來駅 ➔ 足立美術館 (接駁車)",
+        time: "14:00 - 14:20",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t34",
+        day: 3,
+        title: "安來駅 ➔ 足立美術館 (接駁車)",
+        time: "14:30 - 14:50",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t35",
+        day: 3,
+        title: "足立美術館 ➔ 安來駅 (接駁車)",
+        time: "15:55 - 16:15",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t36",
+        day: 3,
+        title: "足立美術館 ➔ 安來駅 (接駁車)",
+        time: "16:30 - 16:50",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t37",
+        day: 3,
+        title: "足立美術館 ➔ 安來駅 (接駁車)",
+        time: "17:10 - 17:30",
+        transport: "無料シャトルバス",
+        details: "免費搭乘。配合電車時間發車，車程約20分鐘。"
+      },
+      {
+        id: "t41",
+        day: 4,
+        title: "松江しんじ湖温泉駅 ➔ 雲州平田駅 (一畑電車)",
+        time: "08:08 - 08:49",
+        transport: "一畑電車",
+        details: "沿途田園風景十分寧靜，車程約1小時。"
+      },
+      {
+        id: "t42",
+        day: 4,
+        title: "松江しんじ湖温泉駅 ➔ 雲州平田駅 (一畑電車)",
+        time: "08:57 - 09:35",
+        transport: "一畑電車",
+        details: "沿途田園風景十分寧靜，車程約1小時。"
+      },
+      {
+        id: "t43",
+        day: 4,
+        title: "雲州平田駅 ➔ 出雲大社前駅 (一畑電車)",
+        time: "09:56 - 10:11",
+        transport: "一畑電車",
+        details: "不用轉乘，急行直達車。"
+      },
+      {
+        id: "t44",
+        day: 4,
+        title: "雲州平田駅 ➔ 出雲大社前駅 (一畑電車)",
+        time: "10:22 - 10:48",
+        transport: "一畑電車",
+        details: "川跡轉乘大社線。"
+      },
+      {
+        id: "t45",
+        day: 4,
+        title: "出雲大社前駅 ➔ 電鉄出雲市駅 (一畑電車)",
+        time: "15:20 - 15:45",
+        transport: "一畑電車",
+        details: "川跡轉乘。"
+      },
+      {
+        id: "t46",
+        day: 4,
+        title: "出雲大社前駅 ➔ 電鉄出雲市駅 (一畑電車)",
+        time: "16:20 - 16:45",
+        transport: "一畑電車",
+        details: "川跡轉乘。"
+      },
+      {
+        id: "t51",
+        day: 5,
+        title: "出雲市駅 ➔ 出雲空港 (出雲一畑交通)",
+        time: "10:05 - 10:35",
+        transport: "出雲空港連絡バス",
+        details: "電鐵出雲市公車站，往出雲空港，約30分鐘。"
+      },
+      {
+        id: "t52",
+        day: 5,
+        title: "出雲市駅 ➔ 出雲空港 (出雲一畑交通)",
+        time: "10:25 - 10:55",
+        transport: "出雲空港連絡バス",
+        details: "電鐵出雲市公車站，往出雲空港，約30分鐘。"
+      },
+      {
+        id: "t53",
+        day: 5,
+        title: "出雲機場 ➔ 羽田機場 (JL280 航班)",
+        time: "11:55 - 13:15",
+        transport: "JAL 日本航空 JL280 航班",
+        details: "國內線直飛1小時20分。提早於10:45前抵達出雲機場辦理登機與託運。"
+      }
+    ];
+
+    // --- Starry Omikuji Fortunes ---
+    const OMIKUJI_FORTUNES = [
+      {
+        grade: "大大吉 🌟 (Dai-Dai-Kichi)",
+        shrine: "出雲大國主守護",
+        desc: "大吉中的頂點！因幡之白兔為您牽起最驚豔的緣分。旅行中會遇見意想不到的美景與貴人。",
+        tip: "在稻佐之濱請深深吸一口海風，神明將吹散所有晦氣。"
+      },
+      {
+        grade: "大吉 🐇 (Dai-Kichi)",
+        shrine: "白兔御神前",
+        desc: "極佳的運勢。您的求知與審美將大有斬獲，足立美術館的庭園會帶給您無比的平靜。",
+        tip: "參拜出雲大社時，記得使用特殊的『二禮、四拍手、一禮』喔！"
+      },
+      {
+        grade: "中吉 💫 (Chuu-Kichi)",
+        shrine: "千鳥城守護",
+        desc: "平穩上升的運勢。松江城的護城河水會為您洗淨平日的喧囂與壓力，舞台劇演出極度震撼。",
+        tip: "在堀川遊覽船穿過低矮橋時，將身子深深伏下，幸運將隨之降臨。"
+      },
+      {
+        grade: "吉 ✨ (Kichi)",
+        shrine: "宇美神社斷惡緣",
+        desc: "除舊布新的好兆頭。那些阻礙您的惡緣已被切斷，全新的良緣正踏著白兔般輕快的步伐走來。",
+        tip: "在宇美神社，靜下心默想討厭的事情，誠心祈求斷緣吧。"
+      },
+      {
+        grade: "幸運御守 🌸 (Lucky Bunny)",
+        shrine: "八雲御守護",
+        desc: "暖心的福分。在鳥取大啖燒肉、在出雲享用割子蕎麥麵，舌尖上的福報正滿滿湧入。",
+        tip: "晚上在Dormy Inn泡完溫泉，一定要喝一瓶冰涼的當地牛奶！"
+      },
+      {
+  grade: "神席大大吉 🌟 (Kami-Dai-Kichi)",
+  shrine: "星守專屬守護",
+  desc: "最頂級的幸運降臨！演出當天將受到命運眷顧，星守的目光彷彿穿越人海精準落在您身上。飯撒連發、互動滿點，甚至可能收穫一個足以回味數年的珍貴瞬間。",
+  tip: "開演前默念一次『今天一定會對到眼』，並保持最燦爛的笑容，好運將主動向您靠近。"
+},
+{
+  grade: "有票大吉 🎫 (Ticket-Kichi)",
+  shrine: "抽選之神加護",
+  desc: "絕佳的票運！原本令人忐忑的抽票結果將迎來驚喜轉機。候補遞補、中選通知、甚至意外釋票，都可能在意想不到的時刻降臨。",
+  tip: "收到任何通知前請保持平常心，幸運往往在您快忘記抽選這件事時悄悄出現。"
+},
+{
+  grade: "飯撒吉 🐇 (Fanservice-Kichi)",
+  shrine: "微笑白兔守護",
+  desc: "溫暖而甜蜜的運勢。雖然未必是最前排的位置，但星守的笑容與小動作將成為您今天最大的寶物。一個揮手、一個比心，足以讓整天都閃閃發亮。",
+  tip: "當星守看向觀眾席時，不要急著低頭看手機。抬起頭來，幸運可能就在那短短一秒鐘。"
+},
+{
+  grade: "星守SSR吉 💎 (SSR)",
+  shrine: "星守的閃耀僅在你眼中",
+  desc: "傳說級籤運。抽票、物販、座位、飯撒全部獲得神級加成。朋友羨慕、推友震驚。",
+  tip: "今天適合把所有運氣都押在星守身上，宇宙正在偷偷幫您作弊。"
+}
+    ];
+
+    // --- Main App Component ---
+    function App() {
+      const [activeDay, setActiveDay] = useState(1);
+      const [omikuji, setOmikuji] = useState(null);
+      const [drawingOmikuji, setDrawingOmikuji] = useState(false);
+      
+      // Map States
+      const [selectedSpot, setSelectedSpot] = useState(null);
+      const [focusedMapQuery, setFocusedMapQuery] = useState(ITINERARY_DATA[0].spots[0].embedQuery);
+      const [focusedMapName, setFocusedMapName] = useState(ITINERARY_DATA[0].spots[0].name);
+
+      // Timetable Custom States
+      const [timetables, setTimetables] = useState(PRESET_TIMETABLES);
+      const [newTimeTitle, setNewTimeTitle] = useState("");
+      const [newTimeRange, setNewTimeRange] = useState("");
+      const [newTimeTransport, setNewTimeTransport] = useState("");
+      const [newTimeDetails, setNewTimeDetails] = useState("");
+
+      const [checklist, setChecklist] = useState([
+        { id: 1, text: "護照與簽證/身分證件", checked: true },
+        { id: 2, text: "JR Pass 山陰地區鐵路周遊券 / 乘車IC卡", checked: false },
+        { id: 3, text: "《カミシバイ-閉-》電子/實體門票", checked: false },
+        { id: 4, text: "日本行動網路卡 / WiFi分享器", checked: false },
+        { id: 5, text: "出雲大社參拜專用『朱印帳』", checked: false },
+        { id: 6, text: "相機、備用電池與充電配備", checked: false },
+        { id: 7, text: "舒適的步行鞋（沙丘與神殿參拜極耗體力）", checked: true },
+      ]);
+      const [newTodo, setNewTodo] = useState("");
+
+      // --- Draw Omikuji (Shinto Fortune) ---
+      const drawOmikuji = () => {
+        setDrawingOmikuji(true);
+        setOmikuji(null);
+        setTimeout(() => {
+          const randomIndex = Math.floor(Math.random() * OMIKUJI_FORTUNES.length);
+          setOmikuji(OMIKUJI_FORTUNES[randomIndex]);
+          setDrawingOmikuji(false);
+        }, 1200);
+      };
+
+      // --- Toggle Checklist Item ---
+      const toggleTodo = (id) => {
+        setChecklist(checklist.map(item => 
+          item.id === id ? { ...item, checked: !item.checked } : item
+        ));
+      };
+
+      // --- Add Checklist Item ---
+      const addTodo = (e) => {
+        e.preventDefault();
+        if (!newTodo.trim()) return;
+        setChecklist([
+          ...checklist,
+          { id: Date.now(), text: newTodo, checked: false }
+        ]);
+        setNewTodo("");
+      };
+
+      // --- Add Custom Timetable Entry ---
+      const handleAddTimetable = (e) => {
+        e.preventDefault();
+        if (!newTimeTitle.trim()) return;
+        const newEntry = {
+          id: "custom-" + Date.now(),
+          day: activeDay,
+          title: newTimeTitle,
+          time: newTimeRange || "未定時刻",
+          transport: newTimeTransport || "自訂交通",
+          details: newTimeDetails || "無備註"
+        };
+        setTimetables([...timetables, newEntry]);
+        setNewTimeTitle("");
+        setNewTimeRange("");
+        setNewTimeTransport("");
+        setNewTimeDetails("");
+      };
+
+      // --- Delete Timetable Entry ---
+      const handleDeleteTimetable = (id) => {
+        setTimetables(timetables.filter(t => t.id !== id));
+      };
+
+      const currentDayData = ITINERARY_DATA.find(d => d.day === activeDay);
+      const currentDayTimetables = timetables.filter(t => t.day === activeDay);
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between">
+          
+          {/* HEADER (With elegant Golden Cloud Divider replacing the police-tape border) */}
+          <header className="relative border-b border-amber-400/20 bg-izumo-deep/90 backdrop-blur-md pt-8 pb-10 px-4 md:px-8 text-center shinto-cloud-divider">
+            <div className="max-w-6xl mx-auto relative">
+              {/* Floating Left & Right Rabbit & Cloud Ornaments */}
+              <div className="hidden md:flex absolute left-0 top-0 items-center space-x-2 text-amber-400/35">
+                <RabbitIcon className="w-14 h-14 animate-pulse-slow" />
+                <CloudIcon className="w-10 h-10 opacity-70" />
+              </div>
+              <div className="hidden md:flex absolute right-0 top-0 items-center space-x-2 text-amber-400/35">
+                <CloudIcon className="w-10 h-10 opacity-70" />
+                <RabbitIcon className="w-14 h-14 transform -scale-x-100 animate-pulse-slow" />
+              </div>
+
+              {/* Shinto Torii Gate Center Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="p-3.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 animate-pulse">
+                  <ToriiIcon className="w-9 h-9" />
+                </div>
+              </div>
+
+              {/* Elegant Shinto Typography */}
+              <h1 className="font-serif text-3xl md:text-5xl font-bold text-amber-100 tracking-wider">
+                星ノ導き・神話の旅
+              </h1>
+              <p className="mt-2 text-xs md:text-sm tracking-widest text-amber-400 uppercase font-serif">
+                Izumo Shrine Starry Sky Tour ✦ 2026.06.08 - 06.14
+              </p>
+            </div>
+          </header>
+
+          {/* MAIN CONTAINER */}
+          <main className="max-w-[1600px] mx-auto px-4 md:px-8 py-8 flex-grow w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* LEFT COLUMN: NAVIGATION & OMIKUJI */}
+            <section className="lg:col-span-3 space-y-6">
+              
+              {/* Day Selector Navigation */}
+              <div className="bg-izumo-slate/90 backdrop-blur-md border border-amber-400/20 p-5 rounded-2xl glow-gold">
+                <h3 className="font-serif text-md font-bold text-amber-300 mb-4 flex items-center justify-between border-b border-slate-800 pb-2">
+                  <span><i className="fa-solid fa-calendar-days mr-2"></i>行程日程表</span>
+                  <span className="text-xs text-slate-400 font-sans">6/8 - 6/14</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 gap-2.5">
+                  {ITINERARY_DATA.map((item) => (
+                    <button
+                      key={item.day}
+                      onClick={() => {
+                        setActiveDay(item.day);
+                        setSelectedSpot(null);
+                        // Auto-focus map to the first spot of the new day
+                        if (item.spots && item.spots.length > 0) {
+                          setFocusedMapQuery(item.spots[0].embedQuery);
+                          setFocusedMapName(item.spots[0].name);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 text-left ${
+                        activeDay === item.day
+                          ? "bg-amber-400 text-izumo-deep font-bold glow-gold shadow-lg"
+                          : "bg-izumo-deep/50 hover:bg-slate-800/80 text-slate-300 border border-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${activeDay === item.day ? 'bg-izumo-deep text-amber-400' : 'bg-slate-800 text-amber-300'}`}>
+                          D{item.day}
+                        </span>
+                        <div className="leading-tight">
+                          <p className="text-xs opacity-75">{item.date} ({item.dayOfWeek})</p>
+                          <h4 className="text-sm font-serif font-bold tracking-tight">{item.theme}</h4>
+                        </div>
+                      </div>
+                      <i className={`fa-solid fa-chevron-right text-xs opacity-50 ${activeDay === item.day ? 'text-izumo-deep' : 'text-slate-400'}`}></i>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shinto Fortune Wheel */}
+              <div className="bg-izumo-slate/90 backdrop-blur-md border border-amber-400/20 p-5 rounded-2xl text-center relative overflow-hidden group glow-gold">
+                {/* Background Rabbit Silhouette */}
+                <div className="absolute right-[-10px] bottom-[-10px] text-slate-800/25 group-hover:text-amber-500/10 transition-colors">
+                  <RabbitIcon className="w-32 h-32" />
+                </div>
+
+                <h3 className="font-serif text-md font-bold text-amber-300 mb-3 flex items-center justify-center">
+                  <RabbitIcon className="w-5 h-5 mr-2 animate-bounce-slow text-amber-300" />
+                  出雲白兔・旅行御神籤
+                </h3>
+                <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+                  出發前向因幡白兔祈願，抽取今日運勢與行前開運神託！
+                </p>
+
+                {drawingOmikuji ? (
+                  <div className="py-8 flex flex-col items-center justify-center">
+                    <div className="relative">
+                      <i className="fa-solid fa-box-archive text-5xl text-amber-300 animate-bounce"></i>
+                      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                        <i className="fa-solid fa-sparkles text-amber-400 text-xs animate-ping"></i>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm text-amber-300 animate-pulse font-serif">神明神力凝聚中...</p>
+                  </div>
+                ) : omikuji ? (
+                  <div className="bg-izumo-deep/80 border border-amber-400/30 p-4 rounded-xl relative animate-fadeIn">
+                    <button 
+                      onClick={() => setOmikuji(null)}
+                      className="absolute top-2 right-2 text-slate-400 hover:text-amber-300 text-xs"
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                    <span className="text-[10px] uppercase tracking-widest text-amber-400 font-serif">神託開示</span>
+                    <h4 className="text-xl font-bold font-serif text-amber-300 my-1">{omikuji.grade}</h4>
+                    <span className="inline-block px-2 py-0.5 bg-amber-400/10 text-amber-300 text-[10px] rounded border border-amber-400/20 mb-3">
+                      {omikuji.shrine}
+                    </span>
+                    <p className="text-xs text-slate-300 mb-2 leading-relaxed">{omikuji.desc}</p>
+                    <div className="mt-3 pt-3 border-t border-slate-800 text-[11px] text-amber-400/90 text-left">
+                      <strong>💡 白兔結緣小叮嚀:</strong> {omikuji.tip}
+                    </div>
+                    <button 
+                      onClick={drawOmikuji}
+                      className="mt-4 text-[11px] font-serif text-amber-300 hover:underline hover:text-amber-100"
+                    >
+                      重新求籤 <i className="fa-solid fa-rotate-right ml-1"></i>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={drawOmikuji}
+                    className="w-full py-3.5 bg-gradient-to-r from-amber-500/80 to-amber-600/80 hover:from-amber-400 hover:to-amber-500 text-izumo-deep font-bold rounded-xl font-serif text-xs transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg glow-gold-hover"
+                  >
+                    <i className="fa-solid fa-envelope-open-text"></i>
+                    <span>求取旅行御神籤</span>
+                  </button>
+                )}
+              </div>
+
+            </section>
+
+            {/* MIDDLE COLUMN: ACTIVE DAY TIMELINE */}
+            <section className="lg:col-span-5 space-y-6">
+              
+              {/* Day Header banner */}
+              <div className="bg-gradient-to-r from-izumo-slate to-izumo-deep border border-amber-400/20 p-6 rounded-2xl relative overflow-hidden shadow-xl glow-gold">
+                <div className="absolute right-4 top-4 opacity-10">
+                  <ToriiIcon className="w-20 h-20" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <div className="flex items-center space-x-2.5 mb-2">
+                    <span className="text-[10px] bg-amber-400 text-izumo-deep font-bold px-2 py-0.5 rounded uppercase font-mono tracking-widest">
+                      DAY {currentDayData.day}
+                    </span>
+                    <span className="text-xs text-amber-400 tracking-wider font-semibold">
+                      {currentDayData.date} ({currentDayData.dayOfWeek})
+                    </span>
+                  </div>
+                  <h2 className="font-serif text-2xl font-bold text-amber-100">
+                    {currentDayData.theme}
+                  </h2>
+                  <p className="mt-2 text-xs md:text-sm text-slate-300 leading-relaxed">
+                    {currentDayData.desc}
+                  </p>
+                </div>
+              </div>
+
+              {/* Timeline list of spots */}
+              <div className="relative pl-6 md:pl-8 space-y-5">
+                
+                {/* Visual Connector Line */}
+                <div className="absolute left-[15px] md:left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-amber-400/50 via-indigo-500/20 to-amber-400/10 z-0"></div>
+
+                {currentDayData.spots.map((spot, index) => {
+                  
+                  // Style different kinds of nodes on timeline
+                  let typeColor = "bg-slate-800 text-slate-300 border-slate-700";
+                  if (spot.type === 'shrine') typeColor = "bg-amber-400/20 text-amber-300 border-amber-400/30";
+                  if (spot.type === 'transport') typeColor = "bg-indigo-950/40 text-indigo-300 border-indigo-700/30";
+                  if (spot.type === 'hotel') typeColor = "bg-emerald-950/30 text-emerald-300 border-emerald-700/30";
+                  if (spot.type === 'food') typeColor = "bg-rose-950/40 text-rose-300 border-rose-800/30";
+
+                  const isFocused = focusedMapName === spot.name;
+
+                  return (
+                    <div 
+                      key={index} 
+                      className={`relative group transition-all duration-300 ${isFocused ? 'scale-[1.01]' : ''}`}
+                    >
+                      {/* Timeline Node Icon (Bullet) */}
+                      <span className={`absolute left-[-29px] md:left-[-35px] top-1.5 w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center border z-10 transition-transform group-hover:scale-110 shadow-lg ${
+                        isFocused 
+                          ? 'bg-amber-400 text-izumo-deep ring-4 ring-amber-400/30' 
+                          : 'bg-izumo-deep border-slate-700 text-amber-400'
+                      }`}>
+                        <i className={`fa-solid ${spot.icon} text-xs md:text-sm`}></i>
+                      </span>
+
+                      {/* Timeline Main Card Content */}
+                      <div className={`backdrop-blur-sm border p-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-xl ${
+                        isFocused 
+                          ? 'bg-slate-800/90 border-amber-400/50 glow-gold' 
+                          : 'bg-izumo-slate/70 border-slate-800 hover:border-amber-400/20'
+                      }`}>
+                        <div className="flex flex-col gap-2.5">
+                          
+                          <div className="cursor-pointer" onClick={() => {
+                            setFocusedMapQuery(spot.embedQuery);
+                            setFocusedMapName(spot.name);
+                          }}>
+                            {/* Time and Category Tag */}
+                            <div className="flex items-center space-x-2 text-xs mb-1">
+                              <span className="font-mono text-amber-300 font-bold tracking-wider">{spot.time}</span>
+                              <span className="text-slate-600">•</span>
+                              <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wide ${typeColor}`}>
+                                {spot.type === 'shrine' ? '神宮・參拜' : 
+                                 spot.type === 'transport' ? '交通・轉乘' : 
+                                 spot.type === 'hotel' ? '住宿・放行李' : 
+                                 spot.type === 'food' ? '美食・美饌' : '景點・名勝'}
+                              </span>
+                            </div>
+
+                            {/* Place Names (Chinese + Japanese) */}
+                            <h4 className="text-md font-serif font-bold text-slate-100 flex flex-wrap items-baseline gap-1.5 group-hover:text-amber-300 transition-colors">
+                              <span>{spot.name}</span>
+                              <span className="text-xs font-sans text-slate-400 font-normal">
+                                {spot.jpName}
+                              </span>
+                            </h4>
+
+                            {/* Spot description text */}
+                            <p className="mt-1.5 text-xs text-slate-300 leading-relaxed font-sans line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                              {formatText(spot.desc)}			     
+                            </p>
+			   <span className="text-xs font-sans text-slate-400 font-normal">{spot.notice}</span>
+
+			   
+                            {/* Main Stage Play Poster Visual Image */}
+                            {spot.imageUrl && (
+                              <div className="mt-3 rounded-lg overflow-hidden border border-slate-800 bg-slate-950 max-h-[350px] relative group flex justify-center items-center">
+                                <img 
+                                  src={spot.imageUrl} 
+                                  alt={spot.name} 
+                                  className="w-auto h-auto max-w-full max-h-[350px] object-contain transform hover:scale-[1.02] transition-transform duration-500"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://placehold.co/600x350/040814/E5A93B?text=カミシバイ-閉-";
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Bar */}
+                          <div className="flex items-center justify-between border-t border-slate-800/80 pt-2.5 mt-1 text-xs">
+                            <span className="text-[10px] text-slate-500">
+                              <i className="fa-solid fa-location-crosshairs mr-1"></i>點擊卡片內置導航
+                            </span>
+
+                            <div className="flex space-x-2">
+                              {/* Detailed Info Trigger */}
+                              <button
+                                onClick={() => setSelectedSpot(spot)}
+                                className="px-2.5 py-1 rounded bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-amber-300 transition-colors flex items-center space-x-1"
+                              >
+                                <i className="fa-solid fa-circle-info"></i>
+                                <span>備註</span>
+                              </button>
+
+                              {/* Embed Switch trigger */}
+                              <button
+                                onClick={() => {
+                                  setFocusedMapQuery(spot.embedQuery);
+                                  setFocusedMapName(spot.name);
+                                }}
+                                className={`px-2.5 py-1 rounded transition-colors flex items-center space-x-1 ${
+                                  isFocused 
+                                    ? 'bg-amber-400 text-izumo-deep font-semibold' 
+                                    : 'bg-amber-400/10 text-amber-300 hover:bg-amber-400/20'
+                                }`}
+                              >
+                                <i className="fa-solid fa-map"></i>
+                                <span>導航 Map</span>
+                              </button>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </section>
+
+            {/* RIGHT COLUMN: INTEGRATED MAP & CUSTOM SCHEDULES */}
+            <section className="lg:col-span-4 space-y-6">
+              
+              {/* Map Panel Widget */}
+              <div className="bg-izumo-slate/90 backdrop-blur-md border border-amber-400/20 p-5 rounded-2xl glow-gold flex flex-col h-[400px]">
+                <h3 className="font-serif text-md font-bold text-amber-300 mb-3 flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
+                  <span><i className="fa-solid fa-map-location mr-2 text-indigo-400"></i>神域內嵌地圖看板</span>
+                  <span className="text-[11px] font-sans text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded">
+                    {focusedMapName}
+                  </span>
+                </h3>
+
+                {/* Google Maps Embed iframe */}
+                <div className="flex-grow w-full rounded-xl overflow-hidden border border-slate-800 relative bg-slate-950">
+                  <iframe 
+                    title="Embedded Travel Map"
+                    width="100%" 
+                    height="100%" 
+                    frameBorder="0" 
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(focusedMapQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                    allowFullScreen
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                  ></iframe>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+                  <span><i className="fa-solid fa-info-circle mr-1 text-amber-400/75"></i>地圖可自由縮放、拖曳</span>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(focusedMapQuery)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-amber-300 hover:underline"
+                  >
+                    在新視窗開啟官方網頁版 <i className="fa-solid fa-arrow-up-right-from-square ml-0.5"></i>
+                  </a>
+                </div>
+              </div>
+
+              {/* Transit Timetable Widget */}
+              <div className="bg-izumo-slate/90 backdrop-blur-md border border-amber-400/20 p-5 rounded-2xl glow-gold flex flex-col">
+                <h3 className="font-serif text-md font-bold text-amber-300 mb-2 flex items-center justify-between border-b border-slate-800 pb-2">
+                  <span><i className="fa-solid fa-train-subway mr-2 text-amber-400"></i>交通乘換時刻表</span>
+                  <span className="text-[10px] text-slate-400">Day {activeDay} 班次</span>
+                </h3>
+
+                {/* Timetable List */}
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 mb-4 mt-2">
+                  {currentDayTimetables.length > 0 ? (
+                    currentDayTimetables.map((t) => (
+                      <div key={t.id} className="p-3 bg-izumo-deep/60 rounded-xl border border-slate-800/80 hover:border-amber-400/20 transition-all relative group">
+                        
+                        {/* Delete button */}
+                        <button
+                          onClick={() => handleDeleteTimetable(t.id)}
+                          className="absolute top-2.5 right-2.5 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                          title="刪除班次"
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                        </button>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded">
+                            {t.time}
+                          </span>
+                          <span className="text-[10px] text-slate-500 max-w-[150px] truncate">{t.transport}</span>
+                        </div>
+                        <h4 className="text-sm font-serif font-bold text-slate-200 mt-1.5">{t.title}</h4>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t.details}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-8 text-center text-xs text-slate-500">
+                      <i className="fa-solid fa-clock-rotate-left text-3xl mb-2 opacity-30"></i>
+                      <p>本日無登錄固定大眾交通時刻班次。</p>
+                      <p className="mt-1">您可在下方手動紀錄預計乘車時間！</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Add Timetable Form */}
+                <form onSubmit={handleAddTimetable} className="p-3 bg-izumo-deep/30 border border-slate-800/80 rounded-xl space-y-2.5">
+                  <span className="text-[11px] text-amber-300/80 font-serif"><i className="fa-solid fa-plus-circle mr-1"></i>記下一筆乘降時刻</span>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="時刻 (例: 09:30-10:15)"
+                      value={newTimeRange}
+                      onChange={(e) => setNewTimeRange(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+                    />
+                    <input
+                      type="text"
+                      placeholder="交通工具 (例: JR特急)"
+                      value={newTimeTransport}
+                      onChange={(e) => setNewTimeTransport(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="起訖站 / 班次名稱 (例: 米子駅 ➔ 鳥取駅)"
+                    value={newTimeTitle}
+                    onChange={(e) => setNewTimeTitle(e.target.value)}
+                    required
+                    className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+                  />
+
+                  <textarea
+                    placeholder="其餘備註 (例: 單程票價、在川跡站轉乘)"
+                    value={newTimeDetails}
+                    onChange={(e) => setNewTimeDetails(e.target.value)}
+                    className="w-full h-12 bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-400 resize-none"
+                  ></textarea>
+
+                  <button
+                    type="submit"
+                    className="w-full py-1.5 bg-amber-400/20 hover:bg-amber-400 hover:text-izumo-deep text-amber-300 font-bold rounded text-xs transition-colors"
+                  >
+                    登錄此時刻表 ✦ Add
+                  </button>
+                </form>
+              </div>
+
+            </section>
+
+          </main>
+
+          {/* SPOT SPECIFIC DETAIL MODAL */}
+          {selectedSpot && (
+            <div className="fixed inset-0 bg-izumo-deep/90 backdrop-blur-sm z-50 overflow-y-auto p-4 animate-fadeIn">
+              <div className="min-h-full flex justify-center py-8">
+              <div className="bg-izumo-slate border border-amber-400/40 w-full max-w-lg rounded-2xl shadow-2xl relative glow-gold max-h-[90vh] overflow-y-auto">
+                
+                {/* Header Decoration */}
+                <div className="h-2 bg-gradient-to-r from-amber-400 via-indigo-500 to-amber-400"></div>
+                
+                <div className="p-6">
+                  {/* Close button */}
+                  <button 
+                    onClick={() => setSelectedSpot(null)}
+                    className="absolute top-4 right-4 text-slate-400 hover:text-amber-300 text-lg transition-colors"
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+
+                  <div className="flex items-center space-x-2 text-xs text-amber-400 mb-2">
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span>神使白兔旅情貼心提示</span>
+                  </div>
+
+                  <h3 className="font-serif text-xl font-bold text-slate-100">{selectedSpot.name}</h3>
+                  <p className="text-xs text-slate-400 italic mb-4">{selectedSpot.jpName}</p>
+
+                  {/* Show Stage Play Visual Image in Modal with full contain alignment */}
+                  {selectedSpot.imageUrl && (
+                    <div className="w-full max-h-[380px] rounded-xl overflow-hidden border border-slate-800 bg-slate-950 mb-4 relative flex justify-center items-center">
+                      <img 
+                        src={selectedSpot.imageUrl} 
+                        alt={selectedSpot.name} 
+                        className="max-w-full max-h-[380px] w-auto h-auto object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://placehold.co/600x350/040814/E5A93B?text=カミシバイ-閉-";
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="bg-izumo-deep/60 p-4 rounded-xl border border-slate-800 mb-4 space-y-3">
+                    <div className="text-xs text-slate-300 leading-relaxed">
+                      <strong className="text-amber-300"><i className="fa-solid fa-compass mr-1"></i>交通與遊歷指南：</strong>
+                      <p className="mt-1">
+                        {formatText(selectedSpot.guide || "本景點推薦預估停留時間為 1.5 ~ 2 小時。自由行乘車時請務必事先確認電車發車時刻。")}
+                      </p>
+                    </div>
+
+                    <div className="text-xs text-slate-300 leading-relaxed">
+                      <strong className="text-amber-300"><i className="fa-solid fa-bell mr-1"></i>白兔碎碎念：</strong>
+                      <p className="mt-1">
+                        {formatText(selectedSpot.bunnyTip || "拍照時多留意光影變化，神殿、湖泊與老街在黃昏魔幻時刻會顯得極為神聖浪漫。")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Inline Google Map preview for details modal too */}
+                  <div className="w-full h-40 rounded-xl overflow-hidden border border-slate-800 mb-4">
+                    <iframe 
+                      title="Modal Map"
+                      width="100%" 
+                      height="100%" 
+                      frameBorder="0" 
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedSpot.embedQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <a
+                      href={selectedSpot.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-grow py-2.5 bg-amber-400 hover:bg-amber-500 text-izumo-deep text-center font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-1"
+                    >
+                      <i className="fa-solid fa-map-location-dot"></i>
+                      <span>在 Google Maps 導航開啟</span>
+                    </a>
+                    <button
+                      onClick={() => setSelectedSpot(null)}
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition-colors border border-slate-700"
+                    >
+                      關閉
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+	   </div>
+          )}
+
+          {/* FOOTER */}
+          <footer className="bg-izumo-slate/90 backdrop-blur-md border-t border-amber-400/20 py-8 px-4 md:px-8 relative">
+            <div className="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Packing / Checklist Todo widget */}
+              <div className="bg-izumo-deep/50 border border-slate-800/80 p-5 rounded-xl">
+                <h4 className="font-serif text-md font-bold text-amber-300 mb-3 flex items-center justify-between pb-1.5 border-b border-slate-800/50">
+                  <span><i className="fa-solid fa-list-check mr-2"></i>行前神聖檢點清單</span>
+                  <span className="text-xs text-slate-500">
+                    已完成 {checklist.filter(i=>i.checked).length} / {checklist.length}
+                  </span>
+                </h4>
+                
+                <form onSubmit={addTodo} className="flex mb-3 gap-2">
+                  <input
+                    type="text"
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    placeholder="例如：日圓現金、備用藥物..."
+                    className="flex-grow bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  />
+                  <input type="hidden" value="10343617082269097716.jpeg" />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-izumo-deep font-bold rounded-lg text-xs transition-colors"
+                  >
+                    新增
+                  </button>
+                </form>
+
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {checklist.map((item) => (
+                    <label 
+                      key={item.id} 
+                      className="flex items-center space-x-3 bg-izumo-deep/40 px-3 py-2 rounded-lg border border-slate-850 cursor-pointer hover:border-slate-700 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={() => toggleTodo(item.id)}
+                        className="rounded border-slate-700 text-amber-500 focus:ring-amber-400/50 focus:ring-offset-izumo-deep"
+                      />
+                      <span className={`text-xs ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'}`}>
+                        {item.text}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+
+              {/* Shinto Style Wisdom Words & Rabbit Notes */}
+              <div className="bg-izumo-deep/50 border border-slate-800/80 p-5 rounded-xl flex flex-col justify-between">
+                <div>
+                  <h4 className="font-serif text-md font-bold text-amber-300 mb-2 flex items-center pb-1.5 border-b border-slate-800/50">
+                    <RabbitIcon className="w-5 h-5 mr-1.5 text-amber-300" />
+                    因幡之白兔：結緣小講堂
+                  </h4>
+                  <ul className="text-xs text-slate-300 space-y-2 leading-relaxed">
+                    <li>
+                      <strong className="text-amber-400">✦ 二禮・四拍手・一禮：</strong> 
+                      出雲大社採古法參拜，與一般神社「二拍手」不同，拍手四下象徵「祈求四季平安、四神守護」，拍手聲須響亮乾淨。
+                    </li>
+                    <li>
+                      <strong className="text-amber-400">✦ 鳥居不走中央：</strong> 
+                      神社鳥居的中央通道被視為「神明的通路」。參拜者應從左側或右側進入，以示敬意。
+                    </li>
+                    <li>
+                      <strong className="text-amber-400">✦ 稻佐之濱取砂：</strong> 
+                      先在稻佐之濱取一些沙子裝袋，帶到出雲大社最後面的「素鵞社」，將沙子奉納進去後，可換取經過神靈加持的「開運神砂」帶回家避邪！
+                    </li>
+                  </ul>
+                </div>	
+                <div className="pt-4 border-t border-slate-800/60 text-center text-[10px] text-slate-500">
+                  © 2026 星ノ導き ✦ 山陰山陽與東京的神話協奏曲。白兔庇佑，諸事大吉。
+                </div>
+              </div>
+
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // --- Render the React application ---
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+
+
+    // --- Dynamic Starry Night Sky Canvas Animation ---
+    window.onload = function() {
+      const canvas = document.getElementById('starfield');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const numStars = 100;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Create initial stars
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5,
+          color: `rgba(229, 169, 59, ${Math.random() * 0.7 + 0.3})`,
+          twinkleSpeed: Math.random() * 0.04 + 0.01,
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+      // Shooting stars logic
+      let shootingStar = null;
+      function triggerShootingStar() {
+        shootingStar = {
+          x: Math.random() * canvas.width * 0.5,
+          y: 0,
+          dx: Math.random() * 4 + 4,
+          dy: Math.random() * 3 + 3,
+          length: Math.random() * 80 + 40,
+          opacity: 1
+        };
+      }
+
+      // Start loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw and update stars
+        stars.forEach(star => {
+          star.angle += star.twinkleSpeed;
+          const currentOpacity = Math.abs(Math.sin(star.angle));
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = star.color.replace(/[^,]+(?=\))/, currentOpacity);
+          ctx.fill();
+        });
+
+        // Trigger shooting star occasionally
+        if (!shootingStar && Math.random() < 0.005) {
+          triggerShootingStar();
+        }
+
+        // Draw and update shooting star
+        if (shootingStar) {
+          ctx.beginPath();
+          const gradient = ctx.createLinearGradient(
+            shootingStar.x, shootingStar.y, 
+            shootingStar.x - shootingStar.dx * (shootingStar.length / 10), 
+            shootingStar.y - shootingStar.dy * (shootingStar.length / 10)
+          );
+          gradient.addColorStop(0, `rgba(229, 169, 59, ${shootingStar.opacity})`);
+          gradient.addColorStop(1, 'rgba(229, 169, 59, 0)');
+          
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 2;
+          ctx.moveTo(shootingStar.x, shootingStar.y);
+          ctx.lineTo(
+            shootingStar.x - shootingStar.dx * (shootingStar.length / 5), 
+            shootingStar.y - shootingStar.dy * (shootingStar.length / 5)
+          );
+          ctx.stroke();
+
+          // Move
+          shootingStar.x += shootingStar.dx;
+          shootingStar.y += shootingStar.dy;
+          shootingStar.opacity -= 0.015;
+
+          if (shootingStar.opacity <= 0 || shootingStar.x > canvas.width || shootingStar.y > canvas.height) {
+            shootingStar = null;
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      // Initialize animation
+      animate();
+    };
+  </script>
+</body>
+</html>
